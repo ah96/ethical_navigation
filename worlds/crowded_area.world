@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="crowded_area_world">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- Add TIAGO Robot -->
+    <include>
+      <uri>model://tiago</uri>
+      <name>tiago_robot</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+    <!-- Add Human Models -->
+    <include>
+      <uri>model://person_standing</uri>
+      <pose>2 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://person_standing</uri>
+      <pose>2 2 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://person_standing</uri>
+      <pose>0 2 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://person_standing</uri>
+      <pose>-2 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://person_standing</uri>
+      <pose>-2 -2 0 0 0 0</pose>
+    </include>
+  </world>
+</sdf>

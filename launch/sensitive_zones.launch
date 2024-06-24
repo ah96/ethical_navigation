@@ -1,0 +1,7 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find your_package_name)/worlds/sensitive_zones.world"/>
+  </include>
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_tiago" output="screen"
+        args="-urdf -model tiago -param robot_description -x 0 -y 0 -z 0.5"/>
+</launch>
