@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ethical Navigation Path Planning</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        .grid {
+            fill: none;
+            stroke: black;
+            stroke-width: 0.5;
+        }
+
+        .obstacle {
+            fill: black;
+        }
+
+        .path {
+            fill: none;
+            stroke: red;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ethical Navigation Path Planning</h1>
+    <form id="planningForm">
+        <label for="algorithm">Select Algorithm:</label>
+        <select id="algorithm" name="algorithm">
+            <option value="a_star">A*</option>
+            <option value="dijkstra">Dijkstra</option>
+            <option value="rrt">RRT</option>
+            <option value="utilitarian">Utilitarian</option>
+            <option value="deontological">Deontological</option>
+            <option value="virtue_ethics">Virtue Ethics</option>
+        </select>
+        <br>
+        <label for="start">Start Position (x,y):</label>
+        <input type="text" id="start" name="start" value="0,0">
+        <br>
+        <label for="goal">Goal Position (x,y):</label>
+        <input type="text" id="goal" name="goal" value="19,19">
+        <br>
+        <button type="button" onclick="startPlanning()">Start Planning</button>
+        <br>
+        <button type="button" onclick="updateMap()">Update Map</button>
+    </form>
+    <div id="visualization"></div>
+
+    <script>
+        let grid = [];
+
+        // Fetch initial grid from the server
+        fetch('/get_map')
+            .then(response => response.json())
+            .then(data => {
+                grid = data;
+                visualizePath([]);
+            });
+
+        function startPlanning() {
+            const algorithm = document.getElementById('algorithm').value;
+            const start = document.getElementById('start').value;
+            const goal = document.getElementById('goal').value;
+
+            fetch('/start_planning', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ algorithm, start, goal }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    visualizePath(data.path);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function updateMap() {
+            fetch('/update_map', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ grid: grid }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Map updated successfully');
+                } else {
+                    alert('Error updating map');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function visualizePath(path) {
+            const width = 400;
+            const height = 400;
+            const scale = 20;
+            d3.select("#visualization").select("svg").remove();  // Clear previous visualization
+            const svg = d3.select("#visualization").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            // Draw grid
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 20; x++) {
+                    svg.append("rect")
+                        .attr("x", x * scale)
+                        .attr("y", y * scale)
+                        .attr("width", scale)
+                        .attr("height", scale)
+                        .attr("class", "grid")
+                        .attr("fill", grid[y][x] === 1 ? "black" : "white")
+                        .attr("stroke", "black")
+                        .on('click', function() {
+                            grid[y][x] = grid[y][x] === 1 ? 0 : 1;
+                            d3.select(this).attr("fill", grid[y][x] === 1 ? "black" : "white");
+                        });
+                }
+            }
+
+            // Draw path
+            if (path.length > 0) {
+                const line = d3.line()
+                    .x(d => d[0] * scale + scale / 2)
+                    .y(d => d[1] * scale + scale / 2);
+
+                svg.append("path")
+                    .attr("d", line(path))
+                    .attr("class", "path");
+            }
+        }
+    </script>
+</body>
+</html>
